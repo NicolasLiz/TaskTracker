@@ -5,9 +5,11 @@ const fs = require("fs");
 const help_menu = 
 `
 add task_descritption: adds a new task and create a new task file in current directory if it doesn't exist
-delete task_id: delete an existing task, does nothing if it doesn't exist
-update task_id new_description: updates and existing task, does nothing if it doesn't exist
+delete task_id: delete an existing task
+update task_id new_description: updates and existing task
 list [task-status]: list all tasks that exist in current directory
+mark-in-progress task_id: changes the task status to in-progress
+mark-done task_id: changes the task status to done
 `
 
 var options = process.argv;
@@ -15,30 +17,28 @@ var tasks = [];
 
 function getDate() {
     var currentdate = new Date(); 
-    var datetime = currentdate.getDate() + "/"
+    return datetime = currentdate.getDate() + "/"
         + (currentdate.getMonth()+1)  + "/" 
         + currentdate.getFullYear() + " @ "  
         + currentdate.getHours() + ":"  
         + currentdate.getMinutes() + ":" 
         + currentdate.getSeconds();
-    return datetime
+
 }
 
 function readTasks() {
-    if (fs.existsSync(".tasks.json")) {
-        return JSON.parse(fs.readFileSync(".tasks.json"))
-    } else return "a"
+    return JSON.parse(fs.readFileSync(".tasks.json"));
 }
 
 function writeTasks() {
-    fs.writeFileSync(".tasks.json", JSON.stringify(tasks))
+    fs.writeFileSync(".tasks.json", JSON.stringify(tasks));
 }
 
 function addTask(desc) {
-    tasks = readTasks()
-    if (tasks = "a") {
-        tasks = []
+    if (fs.existsSync(".tasks.json")) {
+        tasks = readTasks();
     }
+
     const task = {
         "id": tasks.length,
         "description": desc,
@@ -46,46 +46,57 @@ function addTask(desc) {
         "createdAt": getDate(),
         "updatedAt": getDate()
     };
-    
-    tasks[0 + tasks.length] = task
-    writeTasks()
+
+    tasks[0 + tasks.length] = task;
+    writeTasks();
 }
 
 function deleteTask(id) {
-    tasks = readTasks()
-    if (tasks = "a") {
-        console.error("tasks file does not exist in current directory")
-    } else if (id < 0 || id > tasks.length-1) {
-        console.error("index for task out of bounds")
+    if (fs.existsSync(".tasks.json")) {
+        tasks = readTasks();
     } else {
-        tasks.splice(id, 1)
+        console.error("tasks file does not exist in current directory");
+        process.exit(1);
+    }
+    if (id < 0 || id > tasks.length-1) {
+        console.error("index for task out of bounds");
+        process.exit(1);
+    } else {
+        tasks.splice(id, 1);
         if (id < tasks.length) {
             for(let i = id; id < tasks.length; id++) {
-                tasks[i].id = id
+                tasks[i].id = id;
             }
         }
-        writeTasks()
-        }
+        writeTasks();
+    }
 }
 
 function updateTask(id, desc) {
-    tasks = readTasks()
-    if (tasks = "a") {
-        console.error("tasks file does not exist in current directory")
-    } else if (id < 0 || id > tasks.length-1) {
-        console.error("index for task out of bounds")
+    if (fs.existsSync(".tasks.json")) {
+        tasks = readTasks();
     } else {
-        tasks[id].description = desc
-        tasks[id].updatedAt = getDate()
-        writeTasks()
+        console.error("tasks file does not exist in current directory");
+        process.exit(1);
+    }
+    if (id < 0 || id > tasks.length-1) {
+        console.error("index for task out of bounds");
+        process.exit(1);
+    } else {
+        tasks[id].description = desc;
+        tasks[id].updatedAt = getDate();
+        writeTasks();
     }
 }
 
 function listTasks(filter) {
-    tasks = readTasks()
-    if (tasks == "a") {
-        console.error("tasks file does not exist in current directory")
-    } else if (filter == "") {
+    if (fs.existsSync(".tasks.json")) {
+        tasks = readTasks();
+    } else {
+        console.error("tasks file does not exist in current directory");
+        process.exit(1);
+    }
+    if (filter == "") {
         tasks.forEach(task => {
             console.log(
                 "task: " + task.id + "\n" +
@@ -143,26 +154,34 @@ function listTasks(filter) {
 }
 
 function markInProgress(id) {
-    tasks = readTasks()
-    if (tasks = "a") {
-        console.error("tasks file does not exist in current directory")
-    } else if (id < 0 || id > tasks.length-1) {
-        console.error("index for task out of bounds")
+    if (fs.existsSync(".tasks.json")) {
+        tasks = readTasks();
     } else {
-        tasks[id].status = "in-progress"
-        writeTasks()
+        console.error("tasks file does not exist in current directory");
+        process.exit(1)
+    }
+    if (id < 0 || id > tasks.length-1) {
+        console.error("index for task out of bounds");
+        process.exit(1)
+    } else {
+        tasks[id].status = "in-progress";
+        writeTasks();
     }
 }
 
 function markDone(id) {
-    tasks = readTasks()
-    if (tasks = "a") {
-        console.error("tasks file does not exist in current directory")
-    } else if (id < 0 || id > tasks.length-1) {
-        console.error("index for task out of bounds")
+    if (fs.existsSync(".tasks.json")) {
+        tasks = readTasks();
     } else {
-        tasks[id].status = "done"
-        writeTasks()
+        console.error("tasks file does not exist in current directory");
+        process.exit(1)
+    }
+    if (id < 0 || id > tasks.length-1) {
+        console.error("index for task out of bounds");
+        process.exit(1)
+    } else {
+        tasks[id].status = "done";
+        writeTasks();
     }
 }
 
@@ -173,85 +192,86 @@ if (options.length <= 2) {
         case 'add':
             if (options[3]) {
                 if (options.length > 4) {
-                    console.error("too many arguments")
+                    console.error("too many arguments");
                 } else {
-                    addTask(options[3])
+                    addTask(options[3]);
                 }
             } else {
-                console.error("missing task description")
+                console.error("missing task description");
             }
             break;
 
         case "delete":
             if (options[3]) {
                 if (options.length > 4) {
-                    console.error("too many arguments")
+                    console.error("too many arguments");
                 } else {
-                    deleteTask(options[3])
+                    deleteTask(options[3]);
                 }
             } else {
-                console.error("missing task id")
+                console.error("missing task id");
             }
             break;
 
         case "update":
             if (options[3]) {
                 if (options[4]) {
-                    if (options.length > 4) {
-                        console.error("too many arguments")
+                    if (options.length > 5) {
+                        console.error("too many arguments");
                     } else {
-                        updateTask(options[3], options[4])
+                        updateTask(options[3], options[4]);
                     }
                 } else {
-                    console.error("missing new task description")
+                    console.error("missing new task description");
                 }
             } else {
-                console.error("missing task id")
+                console.error("missing task id");
             }
             break;
 
         case "list":
             if (options[3]) {
                 if (options.length > 4) {
-                    console.error("too many arguments")
+                    console.error("too many arguments");
                 } else {
-                    listTasks(options[3])
+                    listTasks(options[3]);
                 }
             } else {
-                listTasks("")
+                listTasks("");
             }
             break;
 
         case "mark-in-progress":
             if (options[3]) {
                 if (options.length > 4) {
-                    console.error("too many arguments")
+                    console.error("too many arguments");
                 } else {
-                    markInProgress(options[3])
+                    markInProgress(options[3]);
                 }
             } else {
-                console.error("missing task id")
+                console.error("missing task id");
             }
             break;
 
         case "mark-done":
             if (options[3]) {
                 if (options.length > 4) {
-                    console.error("too many arguments")
+                    console.error("too many arguments");
                 } else {
-                    markDone(options[3])
+                    markDone(options[3]);
                 }
             } else {
-                console.error("missing task id")
+                console.error("missing task id");
             }
             break;
-        
+
         case "help":
-            console.log(help_menu)
+            console.log(help_menu);
             break;
 
         default:
-            console.error("unknown command")
+            console.error("unknown command");
+            consoel.log(help_menu);
     }
 
 }
